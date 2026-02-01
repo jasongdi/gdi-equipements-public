@@ -8,32 +8,36 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
+    # IMPORTANT : utiliser '&&' (pas &amp;&amp;)
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: false
           lfs: false
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
+          # ⚠️ Laisse ce secret EXACTEMENT comme Azure l’a généré pour TA ressource SWA
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_BAY_08DBEDB10 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # pour les commentaires sur PR
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
 
-app_location: "/"      # chemin de l'app = racine du repo
-api_location: ""       # pas d'API pour l’instant
-output_location: ""    # ← VIDE (et non ".")
+          # 📁 Configuration site statique à la racine
+          app_location: "/"      # ← racine du repo
+          api_location: ""       # ← vide (on ajoutera une API plus tard)
+          output_location: ""    # ← VIDE (surtout pas ".")
+          # Si tu laisses vide, l’action déploie tel quel les fichiers (index.html, equipement.html, etc.)
 
-          ###### End of Repository/Build Configurations ######
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
@@ -45,4 +49,3 @@ output_location: ""    # ← VIDE (et non ".")
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_HAPPY_BAY_08DBEDB10 }}
           action: "close"
-
