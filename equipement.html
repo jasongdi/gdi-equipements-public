@@ -1,96 +1,230 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fiche équipement</title>
+  <meta name="color-scheme" content="light dark"/>
   <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 16px;
-      background: #f7f7f7;
+    :root{
+      --bg:#f7f7f7; --card:#fff; --text:#111; --muted:#666;
+      --primary:#0067b8; --ok:#0a7a2f; --err:#b00020; --bd:#e5e5e5;
     }
-    .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
-    .label { font-weight: 600; color: #555; }
-    .row { margin: 6px 0; }
-    .error { color: #b00020; }
-    .btn {
-      display: inline-block; margin-top: 16px; padding: 10px 14px; border-radius: 8px; border: 0;
-      color: #fff; background: #0067b8; text-decoration: none;
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0e0f12; --card:#17181c; --text:#f2f2f2; --muted:#a0a0a0; --bd:#2a2c33; }
     }
+    body{font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background:var(--bg); color:var(--text);
+         max-width: 920px; margin: 24px auto 72px; padding: 0 16px;}
+    h1{font-size: 28px; margin: 8px 0 16px;}
+    h2{font-size: 20px; margin: 0 0 12px;}
+    .card{ background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:18px; box-shadow: 0 2px 6px rgba(0,0,0,.06); margin:14px 0;}
+    .row{ display:flex; gap:8px; align-items:baseline; margin:6px 0;}
+    .label{ min-width:150px; font-weight:600; color:var(--muted);}
+    .muted{ color:var(--muted); }
+    .btn{ display:inline-block; padding:10px 14px; border-radius:8px; border:0; background:var(--primary); color:#fff; cursor:pointer; text-decoration:none;}
+    .btn.secondary{ background:#555; }
+    textarea, select, input[type="text"], input[type="email"], input[type="tel"]{
+      width:100%; padding:10px 12px; border:1px solid var(--bd); border-radius:8px; background:transparent; color:var(--text);
+    }
+    form .row{ flex-direction:column; align-items:stretch; }
+    .msg{ margin-top:10px; }
+    .msg.ok{ color:var(--ok); }
+    .msg.err{ color:var(--err); }
+    small{ color: var(--muted); }
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width:720px){ .grid-2{ grid-template-columns: 1fr; } .label{min-width:120px;} }
   </style>
 </head>
 <body>
 
   <h1>Fiche équipement</h1>
 
-  <div class="card">
+  <!-- FICHE -->
+  <div class="card" id="fiche">
     <div class="row"><span class="label">ID équipement :</span> <span id="equipementId">—</span></div>
-    <div class="row"><span class="label">Type :</span> <span id="type">—</span></div>
-    <div class="row"><span class="label">Marque :</span> <span id="marque">—</span></div>
-    <div class="row"><span class="label">Modèle :</span> <span id="modele">—</span></div>
-    <div class="row"><span class="label">N° série :</span> <span id="numSerie">—</span></div>
-    <div class="row"><span class="label">Statut :</span> <span id="statut">—</span></div>
-    <div class="row"><span class="label">Site :</span> <span id="site">—</span></div>
+    <div class="grid-2">
+      <div class="row"><span class="label">Type :</span> <span id="type">—</span></div>
+      <div class="row"><span class="label">Statut :</span> <span id="statut">—</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="row"><span class="label">Marque :</span> <span id="marque">—</span></div>
+      <div class="row"><span class="label">Modèle :</span> <span id="modele">—</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="row"><span class="label">N° série :</span> <span id="numSerie">—</span></div>
+      <div class="row"><span class="label">Site :</span> <span id="site">—</span></div>
+    </div>
+    <div id="msgFiche" class="msg err"></div>
+  </div>
 
-    <a id="btnSignal" class="btn" href="#">Signaler un problème</a>
-    <div id="msg" class="row error"></div>
+  <!-- FORMULAIRE TICKET -->
+  <div class="card" id="blocTicket">
+    <h2>Signaler un problème</h2>
+    <form id="formTicket" novalidate>
+      <div class="row">
+        <label class="label" for="description">Description du problème *</label>
+        <textarea id="description" rows="4" required
+          placeholder="Ex.: La brosse ne tourne plus, code erreur 21…"></textarea>
+      </div>
+
+      <div class="grid-2">
+        <div class="row">
+          <label class="label" for="priorite">Priorité</label>
+          <select id="priorite">
+            <option value="Normale" selected>Normale</option>
+            <option value="Urgente">Urgente</option>
+            <option value="Basse">Basse</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label class="label" for="createdBy">Nom (facultatif)</label>
+          <input type="text" id="createdBy" placeholder="Votre nom (pour suivi)">
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="label" for="contact">Contact (facultatif)</label>
+        <input type="text" id="contact" placeholder="Téléphone ou courriel">
+      </div>
+
+      <div class="row">
+        <button class="btn" type="submit">Envoyer le ticket</button>
+        <button class="btn secondary" type="button" id="btnReset" style="display:none;">Envoyer un autre</button>
+      </div>
+      <div id="retour" class="msg"></div>
+      <small class="muted">En envoyant, vous autorisez le traitement de ces informations pour la
+        maintenance de l’équipement.</small>
+    </form>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const equipementId = (params.get("equipementid") || "").trim();
-    const el = (id) => document.getElementById(id);
+    // ====== CONFIG À ADAPTER ======
+    // 1) URL de la Logic App (déclencheur HTTP avec ?sig=...) — PAS de &amp; (utiliser &)
+    const LOGIC_APP_URL = https://prod-10.canadacentral.logic.azure.com:443/workflows/801e2379b1db4f2f8d31669654fb79be/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=_3IyLL8BLDkYZ9HcjHz5yshrVwchBROGcbIQXbx-OGI;
+    // 2) Chemin du JSON des équipements (déployé avec la SWA)
+    const JSON_URL = "/data/equipements.json";
+    // ===============================
 
-    async function main() {
+    const qs = new URLSearchParams(location.search);
+    const equipementId = (qs.get("equipementid") || "").trim();
+
+    const el = (id) => document.getElementById(id);
+    const setText = (id, v) => el(id).textContent = (v ?? "—");
+
+    async function chargerFiche() {
       if (!equipementId) {
-        el("msg").textContent = "Aucun 'equipementid' fourni dans l'URL.";
+        el("msgFiche").textContent = "Aucun 'equipementid' fourni dans l'URL.";
         return;
       }
-      el("equipementId").textContent = equipementId;
+      setText("equipementId", equipementId);
 
       try {
-        // 1) Charger le JSON public du repo
-        const res = await fetch("/data/equipements.json?v=" + Date.now());
+        const res = await fetch(`${JSON_URL}?v=${Date.now()}`);
         if (!res.ok) throw new Error("Impossible de charger les données");
         const all = await res.json();
-
-        // 2) Trouver l'équipement
         const data = all[equipementId];
+
         if (!data) {
-          el("msg").textContent = `Équipement ${equipementId} introuvable dans les données.`;
+          el("msgFiche").textContent = `Équipement ${equipementId} introuvable dans les données.`;
           return;
         }
 
-        // 3) Afficher
-        el("type").textContent = data.Type || "—";
-        el("marque").textContent = data.Marque || "—";
-        el("modele").textContent = data.Modele || data["Modèle"] || "—";
-        el("numSerie").textContent = data.NumSerie || data["Numéro de série"] || "—";
-        el("statut").textContent = data.Statut || "—";
-        el("site").textContent = data.Site || data.SiteID || "—";
-
-        // 4) Bouton "Signaler un problème" (placeholder pour l'instant)
-        // On ajoutera l’envoi vers une Logic App (HTTP) à l'étape suivante.
-        const issueUrl = "#";
-        const btn = el("btnSignal");
-        btn.href = issueUrl;
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-         
-        });
-
-      } catch (err) {
-        console.error(err);
-        el("msg").textContent = "Erreur de chargement des données.";
+        setText("type", data.Type);
+        setText("marque", data.Marque);
+        setText("modele", data.Modele ?? data["Modèle"]);
+        setText("numSerie", data.NumSerie ?? data["Numéro de série"]);
+        setText("statut", data.Statut);
+        setText("site", data.Site ?? data.SiteID);
+      } catch (e) {
+        console.error(e);
+        el("msgFiche").textContent = "Erreur de chargement des données.";
       }
     }
 
-    main();
-  </script>
+    async function envoyerTicket(e) {
+      e.preventDefault();
 
+      const description = el("description").value.trim();
+      const priorite = el("priorite").value;
+      const createdBy = el("createdBy").value.trim();
+      const contact = el("contact").value.trim();
+
+      // Validations simples
+      if (!equipementId) {
+        el("retour").className = "msg err";
+        el("retour").textContent = "ID équipement manquant dans l'URL.";
+        return;
+      }
+      if (!description) {
+        el("retour").className = "msg err";
+        el("retour").textContent = "La description est obligatoire.";
+        el("description").focus();
+        return;
+      }
+      if (!LOGIC_APP_URL || LOGIC_APP_URL.includes("PASTE_YOUR_LOGIC_APP_URL_HERE")) {
+        el("retour").className = "msg err";
+        el("retour").textContent = "Configuration manquante : URL de la Logic App.";
+        return;
+      }
+
+      const payload = {
+        equipementid: equipementId,
+        description,
+        priorite,
+        createdBy,
+        contact,
+        userAgent: navigator.userAgent,
+        pageUrl: location.href,
+        ts: new Date().toISOString()
+      };
+
+      el("retour").className = "msg";
+      el("retour").textContent = "Envoi en cours…";
+
+      try {
+        // Important: text/plain pour éviter un preflight CORS
+        const resp = await fetch(LOGIC_APP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) {
+          const t = await resp.text();
+          throw new Error(`HTTP ${resp.status} – ${t}`);
+        }
+
+        let data = {};
+        try { data = await resp.json(); } catch(_) {}
+        const ticketId = data.ticketId || "";
+
+        el("retour").className = "msg ok";
+        el("retour").textContent = ticketId
+          ? `✅ Ticket envoyé avec succès (ID: ${ticketId}).`
+          : "✅ Ticket envoyé avec succès.";
+
+        el("btnReset").style.display = "inline-block";
+      } catch (err) {
+        console.error(err);
+        el("retour").className = "msg err";
+        el("retour").textContent = `❌ Échec de l'envoi : ${err.message}`;
+      }
+    }
+
+    function resetForm() {
+      el("formTicket").reset();
+      el("retour").className = "msg";
+      el("retour").textContent = "";
+      el("btnReset").style.display = "none";
+    }
+
+    // Hooks
+    el("formTicket").addEventListener("submit", envoyerTicket);
+    el("btnReset").addEventListener("click", resetForm);
+
+    // Init
+    chargerFiche();
+  </script>
 </body>
 </html>
-``
