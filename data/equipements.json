@@ -1,0 +1,11 @@
+{
+  "EQUIP-0001": {
+    "EquipementID": "EQUIP-0001",
+    "Type": "Auto-récureuse",
+    "Marque": "Tennant",
+    "Modele": "T300",
+    "NumSerie": "ABC12345",
+    "Statut": "En service",
+    "Site": "1128-01"
+  }
+}
