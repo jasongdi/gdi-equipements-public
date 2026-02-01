@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiche équipement</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background: #f7f7f7;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    }
+    .label {
+      font-weight: 600;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Fiche équipement</h1>
+
+  <div class="card">
+    <p><span class="label">ID équipement :</span> <span id="equipementId">—</span></p>
+    <p><span class="label">Statut :</span> <span id="statut">En service</span></p>
+    <p><span class="label">Site :</span> <span id="site">—</span></p>
+  </div>
+
+  <script>
+    // 1️⃣ Lire l’EquipementID depuis l’URL
+    const params = new URLSearchParams(window.location.search);
+    const equipementId = params.get("equipementid");
+
+    // 2️⃣ Afficher l’ID
+    if (equipementId) {
+      document.getElementById("equipementId").textContent = equipementId;
+    } else {
+      document.getElementById("equipementId").textContent = "Aucun ID fourni";
+    }
+  </script>
+
+</body>
+</html>
