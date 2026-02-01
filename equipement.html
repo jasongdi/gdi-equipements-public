@@ -12,15 +12,13 @@
       padding: 0 16px;
       background: #f7f7f7;
     }
-    .card {
-      background: #fff;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.1);
-    }
-    .label {
-      font-weight: 600;
-      color: #555;
+    .card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+    .label { font-weight: 600; color: #555; }
+    .row { margin: 6px 0; }
+    .error { color: #b00020; }
+    .btn {
+      display: inline-block; margin-top: 16px; padding: 10px 14px; border-radius: 8px; border: 0;
+      color: #fff; background: #0067b8; text-decoration: none;
     }
   </style>
 </head>
@@ -29,23 +27,70 @@
   <h1>Fiche équipement</h1>
 
   <div class="card">
-    <p><span class="label">ID équipement :</span> <span id="equipementId">—</span></p>
-    <p><span class="label">Statut :</span> <span id="statut">En service</span></p>
-    <p><span class="label">Site :</span> <span id="site">—</span></p>
+    <div class="row"><span class="label">ID équipement :</span> <span id="equipementId">—</span></div>
+    <div class="row"><span class="label">Type :</span> <span id="type">—</span></div>
+    <div class="row"><span class="label">Marque :</span> <span id="marque">—</span></div>
+    <div class="row"><span class="label">Modèle :</span> <span id="modele">—</span></div>
+    <div class="row"><span class="label">N° série :</span> <span id="numSerie">—</span></div>
+    <div class="row"><span class="label">Statut :</span> <span id="statut">—</span></div>
+    <div class="row"><span class="label">Site :</span> <span id="site">—</span></div>
+
+    <a id="btnSignal" class="btn" href="#">Signaler un problème</a>
+    <div id="msg" class="row error"></div>
   </div>
 
   <script>
-    // 1️⃣ Lire l’EquipementID depuis l’URL
     const params = new URLSearchParams(window.location.search);
-    const equipementId = params.get("equipementid");
+    const equipementId = (params.get("equipementid") || "").trim();
+    const el = (id) => document.getElementById(id);
 
-    // 2️⃣ Afficher l’ID
-    if (equipementId) {
-      document.getElementById("equipementId").textContent = equipementId;
-    } else {
-      document.getElementById("equipementId").textContent = "Aucun ID fourni";
+    async function main() {
+      if (!equipementId) {
+        el("msg").textContent = "Aucun 'equipementid' fourni dans l'URL.";
+        return;
+      }
+      el("equipementId").textContent = equipementId;
+
+      try {
+        // 1) Charger le JSON public du repo
+        const res = await fetch("/data/equipements.json?v=" + Date.now());
+        if (!res.ok) throw new Error("Impossible de charger les données");
+        const all = await res.json();
+
+        // 2) Trouver l'équipement
+        const data = all[equipementId];
+        if (!data) {
+          el("msg").textContent = `Équipement ${equipementId} introuvable dans les données.`;
+          return;
+        }
+
+        // 3) Afficher
+        el("type").textContent = data.Type || "—";
+        el("marque").textContent = data.Marque || "—";
+        el("modele").textContent = data.Modele || data["Modèle"] || "—";
+        el("numSerie").textContent = data.NumSerie || data["Numéro de série"] || "—";
+        el("statut").textContent = data.Statut || "—";
+        el("site").textContent = data.Site || data.SiteID || "—";
+
+        // 4) Bouton "Signaler un problème" (placeholder pour l'instant)
+        // On ajoutera l’envoi vers une Logic App (HTTP) à l'étape suivante.
+        const issueUrl = "#";
+        const btn = el("btnSignal");
+        btn.href = issueUrl;
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          alert("Le formulaire 'Signaler un problème' arrive à l'étape suivante ✅");
+        });
+
+      } catch (err) {
+        console.error(err);
+        el("msg").textContent = "Erreur de chargement des données.";
+      }
     }
+
+    main();
   </script>
 
 </body>
 </html>
+``
